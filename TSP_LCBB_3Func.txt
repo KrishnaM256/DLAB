@@ -1,0 +1,225 @@
+package DAA.com;
+
+import java.util.Arrays;
+
+public class TSP_BB_Fun {
+
+    static int N = 8; // Number of cities
+    static int[] finalPath = new int[N + 1];
+    static int finalRes = Integer.MAX_VALUE;
+    static boolean[] visited = new boolean[N];
+
+    // Function to find the first minimum edge cost for a node
+    static private int firstMin(int[][] adj, int i) {
+        int min = Integer.MAX_VALUE;
+        for (int k = 0; k < N; k++) {
+            if (adj[i][k] < min && i != k) {
+                min = adj[i][k];
+            }
+        }
+        return min;
+    }
+
+    // Function to find the second minimum edge cost for a node
+    static private int secondMin(int[][] adj, int i) {
+        int first = Integer.MAX_VALUE, second = Integer.MAX_VALUE;
+        for (int k = 0; k < N; k++) {
+            if (i == k) continue;
+            if (adj[i][k] <= first) {
+                second = first;
+                first = adj[i][k];
+            } else if (adj[i][k] < second && adj[i][k] != first) {
+                second = adj[i][k];
+            }
+        }
+        return second;
+    }
+
+    // Function to copy the current path to the final path
+    static private void copyToFinal(int[] currPath) {
+        for (int i = 0; i < N; i++) {
+            finalPath[i] = currPath[i];
+        }
+        finalPath[N] = currPath[0];
+    }
+
+    // Function to check if a node is a leaf node
+    static boolean isLeafNode(int level) {
+        return level == N;
+    }
+
+    // Recursive function to solve TSP using LC Branch and Bound
+    static private void tspRec(int[][] adj, int currBound, int currCost, int level, int[] currPath) {
+        if (isLeafNode(level)) {
+            if (adj[currPath[level - 1]][currPath[0]] != 0) {
+                int currRes = currCost + adj[currPath[level - 1]][currPath[0]];
+                if (currRes < finalRes) {
+                    finalRes = currRes;
+                    copyToFinal(currPath);
+                }
+            }
+            return;
+        }
+
+        generateChildren(adj, currBound, currCost, level, currPath);
+    }
+
+    // Function to generate children of the current node
+    static void generateChildren(int[][] adj, int currBound, int currCost, int level, int[] currPath) {
+        for (int i = 0; i < N; i++) {
+            if (adj[currPath[level - 1]][i] != 0 && !visited[i]) {
+                int tempBound = currBound;
+                currCost += adj[currPath[level - 1]][i];
+
+                if (level == 1) {
+                    tempBound -= (firstMin(adj, currPath[level - 1]) + firstMin(adj, i)) / 2;
+                } else {
+                    tempBound -= (secondMin(adj, currPath[level - 1]) + firstMin(adj, i)) / 2;
+                }
+
+                if (currCost + tempBound < finalRes) {
+                    currPath[level] = i;
+                    visited[i] = true;
+                    tspRec(adj, tempBound, currCost, level + 1, currPath);
+                }
+
+                // Backtrack
+                currCost -= adj[currPath[level - 1]][i];
+                currBound = tempBound;
+                Arrays.fill(visited, false);
+                for (int j = 0; j < level; j++) {
+                    visited[currPath[j]] = true;
+                }
+            }
+        }
+    }
+
+    // Function to calculate the initial bound for the first node
+    static int calculateInitialBound(int[][] adj) {
+        int bound = 0;
+        for (int i = 0; i < N; i++) {
+            bound += firstMin(adj, i) + secondMin(adj, i);
+        }
+        return (bound % 2 == 1) ? (bound / 2 + 1) : (bound / 2);
+    }
+
+    // Function to initiate the TSP solving process
+    private static void tsp(int[][] adj) {
+        int[] currPath = new int[N + 1];
+        Arrays.fill(visited, false);
+        Arrays.fill(currPath, -1);
+
+        int currBound = calculateInitialBound(adj);
+
+        visited[0] = true;
+        currPath[0] = 0;
+
+        tspRec(adj, currBound, 0, 1, currPath);
+    }
+
+    public static void main(String[] args) {
+        int[][] adj = {
+                { 0, 10, 15, 20, 25, 30, 35, 11 },
+                { 10, 0, 35, 25, 12, 4, 12, 11 },
+                { 15, 35, 0, 30, 50, 7, 12, 11 },
+                { 20, 25, 30, 0, 12, 32, 12, 12 },
+                { 20, 12, 11, 4, 0, 45, 12, 12 },
+                { 12, 34, 5, 64, 23, 0, 15, 12 },
+                { 12, 34, 5, 64, 23, 12, 0, 12 },
+                { 12, 34, 5, 64, 23, 45, 13, 0 }
+        };
+
+        System.out.println("Starting matrix:");
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                System.out.print(adj[i][j] + "\t");
+            }
+            System.out.println();
+        }
+
+        long start = System.currentTimeMillis();
+        tsp(adj);
+        long end = System.currentTimeMillis();
+
+        System.out.println("Minimum cost: " + finalRes);
+        System.out.print("Path taken: ");
+        for (int i = 0; i <= N; i++) {
+            System.out.print(finalPath[i]);
+            if (i != N) {
+                System.out.print("->");
+            }
+        }
+        System.out.println();
+        System.out.println("Execution time: " + (end - start) + "ms");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### **Algorithms**
+
+1. **Generate Start Node**  
+   - Calculate the initial lower bound (`currBound`) for the root node using the sum of the first and second minimum edge weights for each city.  
+   - Mark the first city as visited and initialize the path.
+
+2. **Generate Children**  
+   - For each unvisited city, calculate the updated lower bound and cost (`currCost`).  
+   - If the updated cost + bound is less than the current optimal result (`finalRes`), add the city as a child and recursively explore it.  
+   - Perform backtracking by resetting states after exploring each child.
+
+3. **Check Leaf Node**  
+   - A node is a leaf if all cities are visited, i.e., `level == N`.  
+   - If it’s a leaf, check if the path completes the tour (returns to the starting city) and update the optimal result if this path has a lower cost.
+
+---
+
+### **Time Complexity**
+- **Worst Case**:  O(N!)  
+   - This occurs if no bounding is possible, equivalent to brute force.  
+   - Each node generates up to (N-1) children recursively.
+
+- **Optimized Case**: O(2^N⋅N^2 )
+   - Effective due to pruning using bounds, reducing the search space significantly.
+
+### **Space Complexity**
+- **Space Usage**: O(N^2 +N)=O(N^2)
+ 
+   - The adjacency matrix requires \( O(N^2) \).  
+   - Recursive stack depth can go up to \( O(N) \) due to the path and visited arrays.

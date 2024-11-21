@@ -1,0 +1,105 @@
+package DAA.com;
+import java.util.*;
+public class KnapSack {
+	private static int knapsack(int w,int n,int[] weights,int[] values) {
+		int[][] K = new int[n+1][w+1];
+		for(int i=0;i<=n;i++) {
+			for(int j=0;j<=w;j++) {
+				if(i==0||j==0) {
+					K[i][j] = 0;
+				}else if(weights[i-1]<=j) {
+					K[i][j] = Math.max(K[i-1][j], K[i-1][j-weights[i-1]]+values[i-1]);
+				}else {
+					K[i][j] = K[i-1][j];
+				}
+			}
+		}
+		return K[n][w];
+	}
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		System.out.print("Enter the size: ");
+		int n = sc.nextInt();
+		int[] weights = new int[n];
+		int[] values = new int[n];
+		for(int i=0;i<n;i++) {
+			System.out.print("Enter the weight "+(i+1)+":");
+			weights[i]=sc.nextInt();
+			System.out.print("Enter the value "+(i+1)+":");
+			values[i]=sc.nextInt();
+		}
+		System.out.print("Enter the maximum capacity of the knapsack: ");
+        int w = sc.nextInt();
+        System.out.println("The maximum value that can be obtained is: " + knapsack(w,n, weights, values));
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Algorithm for 0/1 Knapsack (Dynamic Programming)
+
+1. **Initialize:**  
+   Create a DP table `K[n+1][w+1]`, where `K[i][j]` stores the max value for `i` items and knapsack capacity `j`.
+
+2. **Base Case:**  
+   Set `K[i][0] = 0` and `K[0][j] = 0` for all `i` and `j`.
+
+3. **Fill the Table:**  
+   For each item `i` and capacity `j`:
+   - If `weights[i-1] <= j`:  
+     K[i][j]=max(K[i−1][j],K[i−1][j−weights[i−1]]+values[i−1])
+   - Else:  
+     K[i][j]=K[i−1][j]
+
+4. **Result:**  
+   `K[n][w]` is the maximum value achievable.
+
+---
+
+### Complexity
+
+- **Time Complexity:**  
+  O(n⋅w)
+- **Space Complexity:**  
+  O(n⋅w)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

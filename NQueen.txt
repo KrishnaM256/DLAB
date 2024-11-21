@@ -1,0 +1,169 @@
+package DAA.com;
+
+public class Queens {
+	private static int nQueen(boolean[][] board,int row) {
+		if(row==board.length) {
+			display(board);
+			System.out.println();
+			return 1;
+		}
+		int cnt = 0;
+		for(int i=0;i<board.length;i++) {
+			if(isSafe(board,row,i)) {
+				board[row][i]=true;
+				cnt+= nQueen(board,row+1);
+				board[row][i]=false;
+			}
+		}
+		return cnt;
+
+	}
+	private static boolean isSafe(boolean[][] board, int row, int col) {
+		for(int i=0;i<row;i++) {
+			if(board[i][col])return false;
+		}
+		int leftMax = Math.min(row, col);
+		for(int i=0;i<=leftMax;i++) {
+			if(board[row-i][col-i])return false;
+		}
+		int rightMax = Math.min(row, board.length-col-1);
+		for(int i=0;i<=rightMax;i++) {
+			if(board[row-i][col+i])return false;
+		}
+		return true;
+	}
+	private static void display(boolean[][] board) {
+		for(int i=0;i<board.length;i++) {
+			for(int j=0;j<board.length;j++) {
+				if(board[i][j]) {
+					System.out.print("Q ");
+				}else {
+					System.out.print("X ");
+				}
+			}
+			System.out.println();
+		}
+	}
+	public static void main(String[] args) {
+		int n = 4;
+		boolean[][] board = new boolean[n][n];
+		long start1 = System.currentTimeMillis();
+		nQueen(board,0);
+		long end1 = System.currentTimeMillis();
+
+		n = 5;
+		board = new boolean[n][n];
+		long start2 = System.currentTimeMillis();
+		nQueen(board,0);
+		long end2 = System.currentTimeMillis();
+		n = 6;
+		board = new boolean[n][n];
+		long start3 = System.currentTimeMillis();
+		nQueen(board,0);
+		long end3 = System.currentTimeMillis();
+		n = 7;
+		board = new boolean[n][n];
+		long start4 = System.currentTimeMillis();
+		nQueen(board,0);
+		long end4 = System.currentTimeMillis();
+		n = 8;
+		board = new boolean[n][n];
+		long start5 = System.currentTimeMillis();
+		nQueen(board,0);
+		long end5 = System.currentTimeMillis();
+		System.out.println("Time taken for 4 queen: "+(end1-start1)+"ms");
+		System.out.println("Time taken for 5 queen: "+(end2-start2)+"ms");
+		System.out.println("Time taken for 6 queen: "+(end3-start3)+"ms");
+		System.out.println("Time taken for 7 queen: "+(end4-start4)+"ms");
+		System.out.println("Time taken for 8 queen: "+(end5-start5)+"ms");
+	}
+}
+
+
+
+
+
+
+
+
+
+
+### Algorithm for N-Queens Problem
+
+**Input:**  
+- `board`: A boolean matrix representing the chessboard.
+- `row`: The current row being processed.
+
+**Output:**  
+- Number of valid configurations where `n` queens can be placed on the board without attacking each other.
+
+---
+
+### Steps of the Algorithm:
+
+1. **Base Case:**  
+   If all rows are processed (`row == board.length`), a valid configuration is found:
+   - Display the board.
+   - Return `1` to count this configuration.
+
+2. **Iterate Through Columns:**  
+   For the current row, iterate over each column:
+   - Check if placing a queen in the current cell `(row, col)` is safe using the `isSafe` function.
+   - If safe:
+     - Place the queen (`board[row][col] = true`).
+     - Recursively call `nQueen` for the next row.
+     - Backtrack by removing the queen (`board[row][col] = false`).
+
+3. **Check Safety (`isSafe`):**  
+   A position `(row, col)` is safe if:
+   - No queen exists in the same column in previous rows.
+   - No queen exists in the upper left diagonal.
+   - No queen exists in the upper right diagonal.
+
+4. **Display Board:**  
+   Print the board configuration with `Q` for queens and `X` for empty cells.
+
+5. **Return Total Count:**  
+   Return the total count of valid configurations by summing up results from recursive calls.
+
+---
+
+### Complexity Analysis
+
+#### **Time Complexity**
+
+The algorithm attempts to place queens in all possible configurations and uses backtracking to discard invalid ones:
+
+1. **Placement Attempts:**  
+   For `n` rows, each row has `n` columns to try.  
+   - For the first row, `n` choices.  
+   - For the second row, approximately `n-1` choices.  
+   - In the worst case, this results in (O(n!)) recursive calls.
+
+2. **Safety Check:**  
+   - The `isSafe` function iterates through the column, left diagonal, and right diagonal.
+   - This requires O(n) time per call.
+
+**Total Time Complexity:**  
+O(n!⋅n)
+
+
+#### **Space Complexity**
+
+1. **Board Storage:**  
+   - The board is a 2D array of size \(n \times n\):  
+   O(n^2)
+
+2. **Recursive Call Stack:**  
+   -The recursion depth can go up to n, requiring 
+
+**Total Space Complexity:**  
+O(n^2)
+
+
+
+
+
+
+
+

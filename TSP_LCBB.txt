@@ -1,0 +1,197 @@
+package DAA.com;
+
+import java.util.Arrays;
+
+public class TSP_LCBB {
+	static int N=8;
+	static int[] finalPath = new int[N+1];
+	static int finalRes = Integer.MAX_VALUE;
+	static boolean[] visited = new boolean[N];
+	static private int firstMin(int[][] adj,int i) {
+		int min=Integer.MAX_VALUE;
+		for(int k=0;k<N;k++) {
+			if(adj[i][k]<min&& i!=k) {
+				min = adj[i][k];
+			}
+		}
+		return min;
+	}
+	static private int secondMin(int[][] adj,int i) {
+		int first = Integer.MAX_VALUE,second = Integer.MAX_VALUE;
+		for(int k=0;k<N;k++) {
+			if(i==k)continue;
+			if(adj[i][k]<=first) {
+				second = first;
+				first = adj[i][k];
+			}else if(adj[i][k]<second&&adj[i][k]!=first) {
+				second = adj[i][k];
+			}
+		}
+		return second;
+	}
+	static private void copyToFinal(int[] currPath) {
+		for(int i=0;i<N;i++) {
+			finalPath[i]=currPath[i];
+		}
+		finalPath[N] = currPath[0];
+	}
+	static private void tspRec(int[][] adj,int currBound,int currWt,int level,int[] currPath) {
+		if(N==level) {
+			if(adj[currPath[level-1]][currPath[0]]!=0) {
+				int currRes = currWt+adj[currPath[level-1]][currPath[0]];
+				if(currRes<finalRes) {
+					finalRes = currRes;
+					copyToFinal(currPath);
+				}
+			}
+			return;
+		}
+		for(int i=0;i<N;i++) {
+			if(adj[currPath[level-1]][i]!=0&&!visited[i]) {
+				int temp = currBound;
+				currWt += adj[currPath[level-1]][i];
+				if(level==1) {
+					currBound -= (firstMin(adj,currPath[level-1])+firstMin(adj,i))/2;
+				}else {
+					currBound -= (secondMin(adj,currPath[level-1])+firstMin(adj,i))/2;
+				}
+				if(currWt+currBound<finalRes) {
+					visited[i]=true;
+					currPath[level]=i;
+					tspRec(adj,currBound,currWt,level+1,currPath);
+				}
+				Arrays.fill(visited, false);
+				currWt -= adj[currPath[level-1]][i];
+				currBound = temp;
+				for(int j=0;j<=level-1;j++) {
+					visited[currPath[j]]=true;
+				}
+			}
+		}
+	}
+	private static void tsp(int[][] adj) {
+		int[] currPath = new int[N+1];
+		Arrays.fill(visited, false);
+		Arrays.fill(currPath, -1);
+		int currBound = 0;
+		for(int i=0;i<N;i++) {
+			currBound += firstMin(adj,i)+secondMin(adj,i);
+		}
+		currBound = currBound%2==1?currBound/2+1:currBound/2;
+		visited[0]=true;
+		currPath[0]=0;
+		tspRec(adj,currBound,0,1,currPath);
+	}	
+	public static void main(String[] args) {
+		int[][] adj = {
+                { 0, 10, 15, 20, 25, 30, 35, 11 },
+                { 10, 0, 35, 25, 12, 4, 12, 11 },
+                { 15, 35, 0, 30, 50, 7, 12, 11 },
+                { 20, 25, 30, 0, 12, 32, 12, 12 },
+                { 20, 12, 11, 4, 0, 45, 12, 12 },
+                { 12, 34, 5, 64, 23, 0, 15, 12 },
+                { 12, 34, 5, 64, 23, 12, 0, 12 },
+                { 12, 34, 5, 64, 23, 45, 13, 0 }
+        };
+		System.out.println("Starting matrix:");
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                System.out.print(adj[i][j] + "\t");
+            }
+            System.out.println();
+        }
+        long start = System.currentTimeMillis();
+        tsp(adj);
+        long end = System.currentTimeMillis();
+        System.out.println("Minimum cost:"+finalRes);
+        System.out.print("Path taken: ");
+        for(int i=0;i<=N;i++) {
+        	System.out.print(finalPath[i]);
+        	if(i!=N) {
+        		System.out.print("->");
+        	}
+        }
+        System.out.println();
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### **Algorithms Used in the Code**
+
+#### **1. Preprocessing for Initial Bound Calculation**
+   - Functions: `firstMin()` and `secondMin()`
+   - These functions compute the minimum and second minimum edge weights for each row in the adjacency matrix to estimate the lower bound of the cost at each step.
+
+#### **2. Recursive Branch and Bound (B&B)**
+   - Function: `tspRec()`
+   - This function explores all possible Hamiltonian paths from the current node to unvisited nodes while pruning paths that exceed the current best solution (`finalRes`).
+   - At each step:
+     - Updates the current weight and bound.
+     - Recursively visits the next unvisited node.
+     - Backtracks and restores the state to explore alternative paths.
+
+#### **3. Copying the Path**
+   - Function: `copyToFinal()`
+   - Copies the current feasible solution into the `finalPath` array if it provides a better result than the existing minimum cost.
+
+#### **4. Initial Setup**
+   - Function: `tsp()`
+   - Initializes the necessary variables (e.g., current path, bound) and starts the recursive B&B exploration from the first node.
+
+---
+
+### **Time Complexity Analysis**
+
+1. **Preprocessing (Initial Bound Calculation):**
+   - `firstMin()` and `secondMin()`:
+     - Time Complexity: ( O(N^2))
+     - These are called for each of the ( N ) rows of the adjacency matrix.
+
+2. **Branch and Bound:**
+   - At each recursive step:
+     - Explore ( N-1 ) possibilities (remaining unvisited nodes).
+     - Total number of nodes in the recursive tree: (N-1)! (in the worst case, exploring all permutations of nodes).
+     - At each node, updates and comparisons for the current weight and bound require ( O(N) ).
+   - Worst-case Time Complexity: O(N×(N−1)!)
+
+3. **Path Copying:**
+   - `copyToFinal()`:
+     - Time Complexity: ( O(N) )
+     - Called whenever a new path is found, which is infrequent compared to the number of recursive calls.
+
+**Overall Time Complexity: O(N×(N−1)!)
+
+---
+
+### **Space Complexity Analysis**
+
+1. **Adjacency Matrix:**
+   - The matrix `adj` requires \( O(N^2) \) space.
+
+2. **Visited Array:**
+   - The `visited` array uses \( O(N) \) space to track visited nodes.
+
+3. **Recursive Call Stack:**
+   - Depth of recursion is \( N \), so the space required for the call stack is \( O(N) \).
+
+4. **Path Storage:**
+   - `finalPath` and `currPath` each require \( O(N) \) space.
+
+**Overall Space Complexity: \( O(N^2) \)**

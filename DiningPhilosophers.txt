@@ -1,0 +1,159 @@
+package VIIT.com;
+import java.util.concurrent.locks.*;
+public class DiningPhilosopher {
+	static final int N = 5;
+	static final Lock[] forks = new Lock[N];
+	static class Philosopher extends Thread{
+		int id;
+		public Philosopher(int i) {
+			this.id = i;
+		}
+		@Override
+		public void run() {
+			try {
+				while(true) {
+					think();
+					pickUpForks();
+					eat();
+					putDownForks();
+				}
+			}catch(InterruptedException e) {
+				
+			}
+		}
+		private void putDownForks() {
+			int leftFork = id;
+			int rightFork = (id+1)%N;
+			forks[leftFork].unlock();
+			forks[rightFork].unlock();
+			System.out.println("Philosopher "+id+" put down forks.");
+		}
+		private void eat() throws InterruptedException {
+			System.out.println("Philosopher "+id+" is eating.");
+			Thread.sleep((long)(Math.random()*1000));
+		}
+		private void pickUpForks() {
+			int leftFork = id;
+			int rightFork = (id+1)%N;
+			if(id%2==0) {
+				forks[leftFork].lock();
+				forks[rightFork].lock();
+			}
+			else {
+				forks[rightFork].lock();
+				forks[leftFork].lock();
+			}
+			System.out.println("Philosopher "+id+" picked up forks.");
+		}
+		private void think() throws InterruptedException{
+			// TODO Auto-generated method stub
+			System.out.println("Philosopher "+id+" is thinking.");
+			Thread.sleep((long)(Math.random()*1000));
+		}
+	}
+	public static void main(String[] args) {
+		for(int i=0;i<N;i++) {
+			forks[i] = new ReentrantLock();
+		}
+		Philosopher[] philosophers = new Philosopher[N];
+		for(int i=0;i<N;i++) {
+			philosophers[i] = new Philosopher(i);
+			philosophers[i].start();
+		}
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+T.C. : O(N+T)
+S.C. : O(N)
+
+
+
+
+
+
+
+
+
+
+
+
+### **Algorithms:**
+
+1. **Initialization (Main method):**
+   - Allocate `N` locks representing forks.
+   - Create and start `N` philosopher threads.
+
+   **Time Complexity:** \(O(N)\) (initializing locks and threads).
+   **Space Complexity:** \(O(N)\) (storage for locks and threads).
+
+2. **Philosopher's Lifecycle (run method):**
+   - Continuously repeat:
+     - **Think:** Simulates thinking by sleeping for a random duration.
+     - **Pick up forks:** Lock two forks (left and right). Ensure deadlock prevention using an even-odd ordering strategy.
+     - **Eat:** Simulates eating by sleeping for a random duration.
+     - **Put down forks:** Unlock the two forks used.
+
+   **Time Complexity (per iteration):** 
+   - **Think:** \(O(1)\) (random sleep is constant-time).
+   - **Pick up forks:** \(O(1)\) for locking two forks.
+   - **Eat:** \(O(1)\) (random sleep is constant-time).
+   - **Put down forks:** \(O(1)\) for unlocking two forks.
+   - **Overall:** \(O(1)\) per iteration for each philosopher.
+
+   **Space Complexity:** 
+   - No significant space usage per iteration (\(O(1)\)) as only temporary variables (e.g., fork indices) are used.
+
+---
+
+### **Time Complexity (Overall):**
+- **Initialization:** \(O(N)\) for creating locks and threads.
+- **Philosopher operations:** Each philosopher operates independently in a loop, so complexity per philosopher is \(O(1)\) per iteration. Total complexity depends on the duration of execution.
+
+**Overall Complexity:**  
+- \(O(N + T)\), where \(T\) is the number of iterations across all philosophers.
+
+---
+
+### **Space Complexity (Overall):**
+- Locks: \(O(N)\) for storing fork locks.
+- Threads: \(O(N)\) for philosopher thread objects.
+- Temporary variables: \(O(1)\) per thread.
+
+**Overall Space Complexity:** \(O(N)\).
+
+
+
+
+
+
+
+
+

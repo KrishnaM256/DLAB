@@ -1,0 +1,237 @@
+package VIIT.com;
+
+import java.util.*;
+
+public class Assignment5_Genetic {
+
+    static int numCities;
+    static Random rand = new Random();
+    static int[][] distMatrix;
+
+    // Fitness Function
+    public static int calculateTourLength(int[] tour) {
+        int length = 0;
+        for (int i = 0; i < tour.length - 1; i++) {
+            length += distMatrix[tour[i]][tour[i + 1]];
+        }
+        length += distMatrix[tour[tour.length - 1]][tour[0]]; // Return to start
+        return length;
+    }
+
+    // Crossover Function
+    public static int[] crossover(int[] parent1, int[] parent2) {
+        int[] child = new int[numCities];
+        int crossoverPoint = rand.nextInt(numCities);
+        for (int i = 0; i < crossoverPoint; i++) {
+            child[i] = parent1[i];
+        }
+        boolean[] visited = new boolean[numCities];
+        for (int i = 0; i < crossoverPoint; i++) {
+            visited[child[i]] = true;
+        }
+        int currIndex = crossoverPoint;
+        for (int i = 0; i < numCities; i++) {
+            if (!visited[parent2[i]]) {
+                child[currIndex++] = parent2[i];
+            }
+        }
+        return child;
+    }
+
+    // Mutation Function
+    public static void mutate(int[] tour) {
+        int i = rand.nextInt(numCities);
+        int j = rand.nextInt(numCities);
+        while (i == j) {
+            j = rand.nextInt(numCities);
+        }
+        int temp = tour[i];
+        tour[i] = tour[j];
+        tour[j] = temp;
+    }
+
+    // Generate random chromosome
+    public static int[] generateRandomChromosome() {
+        int[] chromosome = new int[numCities];
+        for (int i = 0; i < numCities; i++) {
+            chromosome[i] = i;
+        }
+        for (int i = 0; i < numCities; i++) {
+            int j = rand.nextInt(numCities);
+            int temp = chromosome[i];
+            chromosome[i] = chromosome[j];
+            chromosome[j] = temp;
+        }
+        return chromosome;
+    }
+
+    // Genetic algorithm
+    public static int[] genTSP(int generations, int populationSize) {
+        int[][] population = new int[populationSize][numCities];
+        for (int i = 0; i < populationSize; i++) {
+            population[i] = generateRandomChromosome();
+        }
+        for (int gen = 0; gen < generations; gen++) {
+            int[] fitness = new int[populationSize];
+            for (int i = 0; i < populationSize; i++) {
+                fitness[i] = calculateTourLength(population[i]);
+            }
+            int[] parent1 = population[0];
+            int[] parent2 = population[1];
+            int bestFitness = Integer.MAX_VALUE;
+            int secondBest = Integer.MAX_VALUE;
+            for (int i = 0; i < populationSize; i++) {
+                if (bestFitness > fitness[i]) {
+                    parent2 = parent1;
+                    secondBest = bestFitness;
+                    bestFitness = fitness[i];
+                    parent1 = population[i];
+                } else if (secondBest > fitness[i]) {
+                    secondBest = fitness[i];
+                    parent2 = population[i];
+                }
+            }
+            int[][] newPopulation = new int[populationSize][numCities];
+            for (int i = 0; i < populationSize; i++) {
+                int[] child = crossover(parent1, parent2);
+                mutate(child);
+                newPopulation[i] = child;
+            }
+            population = newPopulation;
+        }
+        int[] bestTour = population[0];
+        int bestTourLength = calculateTourLength(bestTour);
+        for (int i = 1; i < populationSize; i++) {
+            int tourLength = calculateTourLength(population[i]);
+            if (tourLength < bestTourLength) {
+                bestTour = population[i];
+                bestTourLength = tourLength;
+            }
+        }
+        return bestTour;
+    }
+
+    private static void printChromosome(int[] bestTour) {
+        System.out.println(Arrays.toString(bestTour));
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter the number of cities: ");
+        numCities = sc.nextInt();
+
+        distMatrix = new int[numCities][numCities];
+        System.out.println("Enter the distance matrix:");
+        for (int i = 0; i < numCities; i++) {
+            for (int j = 0; j < numCities; j++) {
+                distMatrix[i][j] = sc.nextInt();
+            }
+        }
+
+        int generations = 500;
+        int populationSize = 50;
+
+        int[] bestTour = genTSP(generations, populationSize);
+
+        System.out.println("Best Tour: ");
+        printChromosome(bestTour);
+        System.out.println("Total Distance: " + calculateTourLength(bestTour));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Algorithms and Analysis for TSP Genetic Algorithm
+
+---
+
+#### 1. **Fitness Function**
+   **Algorithm**: Calculates the total tour length by summing distances between consecutive cities and returning to the start.
+   - **Time Complexity**: \(O(n)\), where \(n\) is the number of cities.
+   - **Space Complexity**: \(O(1)\) (no additional space).
+
+---
+
+#### 2. **Crossover**
+   **Algorithm**: Combines two parent chromosomes at a random crossover point to create a child, ensuring no duplicates.
+   - **Time Complexity**: \(O(n)\), for iterating over cities to form the child.
+   - **Space Complexity**: \(O(n)\), for the child chromosome and `visited` array.
+
+---
+
+#### 3. **Mutation**
+   **Algorithm**: Swaps two random cities in the tour.
+   - **Time Complexity**: \(O(1)\), as only two positions are swapped.
+   - **Space Complexity**: \(O(1)\).
+
+---
+
+#### 4. **Generate Random Chromosome**
+   **Algorithm**: Creates a random permutation of cities.
+   - **Time Complexity**: (O(n)), for shuffling the array.
+   - **Space Complexity**: (O(n)), for the chromosome array.
+
+---
+
+#### 5. **Genetic Algorithm**
+   **Algorithm**:
+   - Initialize a population of chromosomes.
+   - For each generation:
+     1. Calculate fitness for all chromosomes. O(p⋅n)
+     2. Select best parents. \(O(p)\)
+     3. Generate new population via crossover and mutation. O(p⋅n)
+   - Select the best tour.
+   - **Time Complexity**: O(g⋅p⋅n) ,where:
+     - \(g\): Number of generations.
+     - \(p\): Population size.
+     - \(n\): Number of cities.
+   - **Space Complexity**: (O(p.n)), for the population.
+
+---
+
+### Overall Complexity
+- **Time Complexity**: O(g⋅p⋅n).
+- **Space Complexity**: O(p⋅n).
+
+
+
+
+
+

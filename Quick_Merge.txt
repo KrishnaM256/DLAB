@@ -1,0 +1,173 @@
+package VIIT.com;
+
+import java.util.*;
+
+public class QuickMergeCompare {
+	
+    static private void QuickSort(int[] array, int start, int end) {
+        if (start >= end) return;
+        int mid = start + (end - start) / 2;
+        int pivot = array[mid];
+        int low = start;
+        int high = end;
+        while (low <= high) {
+            while (array[low] < pivot) {
+                low++;
+            }
+            while (array[high] > pivot) {
+                high--;
+            }
+            if (low <= high) {
+                int temp = array[low];
+                array[low] = array[high];
+                array[high] = temp;
+                low++;
+                high--;
+            }
+        }
+        QuickSort(array, start, high);
+        QuickSort(array, low, end);
+    }
+
+    static private int[] mergeSort(int[] arr) {
+        if (arr.length == 1) return arr;
+        int mid = arr.length / 2;
+        int[] left = mergeSort(Arrays.copyOfRange(arr, 0, mid));
+        int[] right = mergeSort(Arrays.copyOfRange(arr, mid, arr.length));
+        return merge(left, right);
+    }
+
+    static private int[] merge(int[] left, int[] right) {
+        int n1 = left.length;
+        int n2 = right.length;
+        int[] mix = new int[n1 + n2];
+        int i = 0, j = 0, k = 0;
+        while (i < n1 && j < n2) {
+            if (left[i] < right[j]) {
+                mix[k++] = left[i++];
+            } else {
+                mix[k++] = right[j++];
+            }
+        }
+        while (i < n1) {
+            mix[k++] = left[i++];
+        }
+        while (j < n2) {
+            mix[k++] = right[j++];
+        }
+        return mix;
+    }
+
+    public static void main(String[] args) {
+        
+        int[] arr= new int[500];
+        for(int i=0; i<500; i++){
+            arr[i]=(int)(Math.random()*500)+1;
+        }
+        System.out.println("original Array:");
+        System.out.println(Arrays.toString(arr));
+        
+        int[] arr2 = Arrays.copyOf(arr, arr.length); 
+
+        long start = System.nanoTime();
+        QuickSort(arr, 0, arr.length - 1);
+        long end = System.nanoTime();
+        System.out.print("Quick sort: ");
+        for (int i = 0; i < 500; i++) {
+            System.out.print(arr[i] + " ");
+        }
+        System.out.println();
+        System.out.println("Time taken by Quick Sort: " + (end - start) / 1e6 + " ms");
+
+        long start2 = System.nanoTime();
+        int[] res = mergeSort(arr2);
+        long end2 = System.nanoTime();
+        System.out.print("Merge sort: ");
+        for (int i = 0; i < 500; i++) {
+            System.out.print(res[i] + " ");
+        }
+        System.out.println();
+        System.out.println("Time taken by Merge Sort: " + (end2 - start2) / 1e6 + " ms");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### **Algorithms Analysis**
+
+#### **1. QuickSort Algorithm**  
+**Algorithm:**  
+- Choose a pivot (middle element here).
+- Partition the array such that elements less than the pivot are on the left and elements greater than the pivot are on the right.
+- Recursively sort the left and right partitions.
+
+**Time Complexity:**  
+- **Best Case:** \(O(n \log n)\) (balanced partitions).  
+- **Worst Case:** \(O(n^2)\) (unbalanced partitions, e.g., sorted array).  
+- **Average Case:** \(O(n \log n)\).  
+
+**Space Complexity:**  
+- **In-place:** Requires \(O(\log n)\) space for recursion stack in balanced cases.  
+- **Worst Case:** \(O(n)\) for recursion stack in unbalanced cases.
+
+---
+
+#### **2. MergeSort Algorithm**  
+**Algorithm:**  
+- Divide the array into two halves recursively until each subarray has one element.  
+- Merge sorted subarrays back into a single sorted array.  
+
+**Time Complexity:**  
+- **Best Case, Worst Case, Average Case:** \(O(n \log n)\), as division and merging occur for every level of recursion.  
+
+**Space Complexity:**  
+- Requires \(O(n)\) additional space for temporary arrays used during merging.
+
+---
+
+### **Comparison Summary**
+
+| **Algorithm** | **Time Complexity (Best)** | **Time Complexity (Worst)** | **Time Complexity (Average)** | **Space Complexity** |
+|----------------|----------------------------|-----------------------------|--------------------------------|-----------------------|
+| QuickSort      | \(O(n \log n)\)           | \(O(n^2)\)                  | \(O(n \log n)\)                | \(O(\log n)\) (in-place) |
+| MergeSort      | \(O(n \log n)\)           | \(O(n \log n)\)             | \(O(n \log n)\)                | \(O(n)\)             |
+
+---
+
+
+
